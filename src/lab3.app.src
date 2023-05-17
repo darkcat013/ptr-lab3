@@ -1,0 +1,13 @@
+{application, lab3,
+ [{description, "Message broker app"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {lab3_app, []}},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+  {links, []}
+ ]}.

@@ -1,0 +1,16 @@
+@startuml
+
+collections "Producers or Consumers" as PC
+participant "Server" as Serv
+participant "Message Broker" as MB
+participant "Dead Letter Actor" as DLA
+participant "Database" as DB
+
+PC -> Serv: Connect
+Serv -> PC: Success
+PC -> Serv: Message
+Serv -> MB: Message
+MB -> DLA: Incorrect Message
+DLA -> DB: Persist dead message
+DLA -> PC: Error message
+@enduml

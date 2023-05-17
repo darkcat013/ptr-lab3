@@ -1,0 +1,21 @@
+@startuml
+
+collections "Consumers" as C
+participant "Consumer Server" as CServ
+participant "Message Broker" as MB
+participant "Consumer Supervisor" as CS
+collections "Durable Queue Workers" as DQW
+participant "Topic Actor" as TA
+participant "Database" as DB
+
+C -> CServ: Connect
+CServ -> C: Success
+C -> CServ: Subscribe message
+CServ -> MB: Subscribe message
+MB -> CS: {Topic, Consumer Id}
+CS-> DB: Persist {Topic, Consumer Id}
+CS -> DQW: Topic
+DQW -> C: Old messages
+DQW -> DB: Persist message queue if no ACK from consumer
+C -> DQW: ACK
+@enduml
