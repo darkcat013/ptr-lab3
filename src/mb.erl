@@ -9,6 +9,9 @@ start() ->
 
 loop(LoggedConsumers) ->
   receive
+    {consack, Socket} ->
+      dq_supervisor:send_ack(
+        maps:get(Socket, LoggedConsumers));
     {logoff, Socket} ->
       case maps:is_key(Socket, LoggedConsumers) of
         true ->
@@ -80,8 +83,9 @@ handle_logged_consumer(Socket, JsonMap, _) ->
                "Json is valid but has invalid properties, should be {\"login\":Strin"
                "g} or {\"subscribe\":String} or {\"unsubscribe\":String}\r\n").
 
-handle_producer(_Socket, #{<<"topic">> := Topic, <<"message">> := Message} = _JsonMap) ->
-  db:upsert_topic_message(Topic, Message);
+handle_producer(Socket, #{<<"topic">> := Topic, <<"message">> := Message} = _JsonMap) ->
+  ok = db:upsert_topic_message(Topic, Message),
+  gen_tcp:send(Socket, "PUBACK\r\n");
 handle_producer(Socket, JsonMap) ->
   dead_letter ! {producer, JsonMap},
   gen_tcp:send(Socket,

@@ -4,7 +4,7 @@
 
 -export([start_link/0]).
 -export([init/1]).
--export([start_queue/2, stop_queue/1, get_children/0]).
+-export([start_queue/2, stop_queue/1, send_ack/1, get_children/0]).
 
 -define(SERVER, ?MODULE).
 
@@ -21,16 +21,28 @@ init([]) ->
   {ok, {SupFlags, []}}.
 
 start_queue(ConsumerName, Socket) ->
-    supervisor:start_child(?MODULE,
-                           #{id => ConsumerName,
-                             start => {dq_worker, start, [ConsumerName, Socket]},
-                             restart => permanent,
-                             shutdown => 2000,
-                             type => worker,
-                             modules => [dq_worker]}).
+  supervisor:start_child(?MODULE,
+                         #{id => ConsumerName,
+                           start => {dq_worker, start, [ConsumerName, Socket]},
+                           restart => permanent,
+                           shutdown => 2000,
+                           type => worker,
+                           modules => [dq_worker]}).
 
 stop_queue(ConsumerName) ->
   supervisor:terminate_child(?MODULE, ConsumerName).
+
+send_ack(ConsumerName) ->
+  [{_Id, ChildPid, _, _}] =
+    lists:filter(fun(Elem) ->
+                    case Elem of
+                      {ConsumerName, _Pid, _, _} -> true;
+                      _ -> false
+                    end
+                 end,
+                 get_children()),
+  ChildPid ! ack,
+  ok.
 
 get_children() ->
   supervisor:which_children(?MODULE).

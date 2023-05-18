@@ -7,39 +7,41 @@ start(Port) ->
   Pid = spawn_link(fun() -> accept(Socket) end),
   {ok, Pid}.
 
-  accept(ListenSocket) ->
-    case gen_tcp:accept(ListenSocket) of
-      {ok, Socket} ->
-        io:format("Consumer Server | New connection: ~p~n", [Socket]),
-        Pid =
-          spawn(fun() ->
-                   gen_tcp:send(Socket, "Connection accepted, please login\r\n"),
-                   loop(Socket)
-                end),
-        gen_tcp:controlling_process(Socket, Pid),
-        accept(ListenSocket);
-      Error ->
-        exit(Error)
-    end.
-  
-  loop(Sock) ->
-    inet:setopts(Sock, [{active, once}]),
-    receive
-      {tcp, Socket, Data} ->
-        io:format("Consumer Server | Got packet from ~p: ~p~n", [Socket, Data]),
-        case json_helper:try_decode(Data) of
-          {true, JsonMap} ->
-            message_broker ! {consumer, Socket, JsonMap};
-          _ ->
-            dead_letter ! {consumer, Data},
-            gen_tcp:send(Socket, "Invalid json, try again\r\n")
-        end,
-        loop(Socket);
-      {tcp_closed, Socket} ->
-        message_broker ! {logoff, Socket},
-        io:format("Consumer Server | Connection ~p closed~n", [Socket]);
-      {tcp_error, Socket, Reason} ->
-        io:format("Consumer Server | Error on connection ~p reason: ~p~n", [Socket, Reason])
-    end.
-  
+accept(ListenSocket) ->
+  case gen_tcp:accept(ListenSocket) of
+    {ok, Socket} ->
+      io:format("Consumer Server | New connection: ~p~n", [Socket]),
+      Pid =
+        spawn(fun() ->
+                 gen_tcp:send(Socket, "Connection accepted, please login\r\n"),
+                 loop(Socket)
+              end),
+      gen_tcp:controlling_process(Socket, Pid),
+      accept(ListenSocket);
+    Error ->
+      exit(Error)
+  end.
 
+loop(Sock) ->
+  inet:setopts(Sock, [{active, once}]),
+  receive
+    {tcp, Socket, Data = <<"CONSACK\r\n">>} ->
+      io:format("Consumer Server | Got packet from ~p: ~p~n", [Socket, Data]),
+      message_broker ! {consack, Socket},
+      loop(Socket);
+    {tcp, Socket, Data} ->
+      io:format("Consumer Server | Got packet from ~p: ~p~n", [Socket, Data]),
+      case json_helper:try_decode(Data) of
+        {true, JsonMap} ->
+          message_broker ! {consumer, Socket, JsonMap};
+        _ ->
+          dead_letter ! {consumer, Data},
+          gen_tcp:send(Socket, "Invalid json, try again\r\n")
+      end,
+      loop(Socket);
+    {tcp_closed, Socket} ->
+      message_broker ! {logoff, Socket},
+      io:format("Consumer Server | Connection ~p closed~n", [Socket]);
+    {tcp_error, Socket, Reason} ->
+      io:format("Consumer Server | Error on connection ~p reason: ~p~n", [Socket, Reason])
+  end.

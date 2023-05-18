@@ -5,7 +5,7 @@
          get_consumer_topics/1, get_consumer_topics_map/1, create_consumer_topics/1,
          consumer_subscribe/2, consumer_unsubscribe/2, consumer_increment_topic_index/2,
          get_all_dead_letter/0, insert_dead_letter/2]).
--export([reset/0]).
+-export([reset/0, reset_ct/0, reset_dl/0, reset_tm/0]).
 
 init() ->
   dets:open_file(topic_messages_table, [{file, "topic_messages.dets"}]),
@@ -110,10 +110,13 @@ uuid() ->
 
 reset_tm() ->
   dets:delete_all_objects(topic_messages_table).
+
 reset_ct() ->
   dets:delete_all_objects(consumer_topics_table).
+
 reset_dl() ->
   dets:delete_all_objects(dead_letter_table).
+
 reset() ->
   reset_tm(),
   reset_ct(),

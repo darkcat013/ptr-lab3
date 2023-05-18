@@ -19,8 +19,11 @@ for_each(ConsumerName, Socket, Key, Value) ->
     Message ->
       gen_tcp:send(Socket,
                    iolist_to_binary(["Topic: ", Key, "\r\nMessage: ", Message, "\r\n"])),
-      Result = db:consumer_increment_topic_index(ConsumerName, Key),
-      io:format("~p~n", [Result]);
+      receive
+        ack ->
+          ok
+      end,
+      db:consumer_increment_topic_index(ConsumerName, Key);
     _ ->
       io:format("error")
   end.
