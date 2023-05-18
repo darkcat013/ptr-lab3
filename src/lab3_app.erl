@@ -5,7 +5,8 @@
 -export([start/2, stop/1]).
 
 start(_StartType, _StartArgs) ->
-  db:init(),
+  ok = db:init(),
+  ok = quickrand:seed(),
   lab3_sup:start_link().
 
 stop(_State) ->

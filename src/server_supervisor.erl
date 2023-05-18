@@ -20,12 +20,12 @@ init([]) ->
 
   ServerProducer =
     #{id => server_producer,
-      start => {server_producer, start, [4010]},
+      start => {server_producer, start, [4123]},
       restart => permanent,
       modules => [server_producer]},
   ServerConsumer =
     #{id => server_consumer,
-      start => {server_consumer, start, [4011]},
+      start => {server_consumer, start, [4234]},
       restart => permanent,
       modules => [server_consumer]},
   ChildSpecs = [ServerProducer, ServerConsumer],

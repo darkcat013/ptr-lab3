@@ -30,9 +30,9 @@ init([]) ->
       modules => [dead_letter]},
   DurableQueueSupervisor =
     #{id => dq_supervisor,
-      start => {dq_supervisor, start, []},
+      start => {dq_supervisor, start_link, []},
       restart => permanent,
       type => supervisor,
       modules => [dq_supervisor]},
-  ChildSpecs = [MessageBroker],% DeadLetter, DurableQueueSupervisor],
+  ChildSpecs = [MessageBroker, DeadLetter, DurableQueueSupervisor],
   {ok, {SupFlags, ChildSpecs}}.

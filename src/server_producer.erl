@@ -29,8 +29,9 @@ loop(Sock) ->
       io:format("Producer Server | Got packet from ~p: ~p~n", [Socket, Data]),
       case json_helper:try_decode(Data) of
         {true, JsonMap} ->
-          message_broker ! JsonMap;
+          message_broker ! {producer, Socket, JsonMap};
         _ ->
+          dead_letter ! {producer, Data},
           gen_tcp:send(Socket, "Invalid json, try again\r\n")
       end,
       loop(Socket);
