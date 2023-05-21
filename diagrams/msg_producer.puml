@@ -3,9 +3,6 @@
 collections "Producers" as P
 participant "Producer Server" as PServ
 participant "Message Broker" as MB
-participant "Consumer Topic Supervisor" as CS
-collections "Durable Queue Workers" as DQW
-collections "Consumers" as C
 participant "Database" as DB
 
 P -> PServ: Connect
@@ -13,9 +10,6 @@ PServ -> P: Success
 P -> PServ: Message
 PServ -> MB: Message
 MB -> DB: Persist message for new consumers
-MB -> CS: {Message, Topic}
-CS -> DQW: Message
-DQW -> C: Message
-DQW -> DB: Persist message queue if no ACK from consumer
-C -> DQW: ACK
+DB -> MB: ok
+MB -> P: PUBACK
 @enduml

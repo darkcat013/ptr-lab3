@@ -9,8 +9,11 @@ participant "Database" as DB
 PC -> Serv: Connect
 Serv -> PC: Success
 PC -> Serv: Message
+Serv-> DLA: Incorrect Message
+Serv-> PC: Error message
 Serv -> MB: Message
 MB -> DLA: Incorrect Message
+MB-> PC: Error message
 DLA -> DB: Persist dead message
-DLA -> PC: Error message
+DB -> DLA: ok
 @enduml

@@ -5,7 +5,7 @@
 [Consumer Server] as CServ
 [Message Broker Supervisor] as MBS
 [Message Broker] as MB
-[Consumer Topic Supervisor] as CS
+[Durable Queue Supervisor] as QS
 [Dead Letter Actor] as DLA
 [Durable Queue Worker] as DQ1
 [Durable Queue Worker] as DQ2
@@ -14,10 +14,10 @@ AS --> MBS
 AS --> SS
 SS --> PServ
 SS --> CServ
-MBS --> CS
+MBS --> QS
 MBS --> MB
 MBS --> DLA
-CS --> DQ1
-CS --> DQ2
-CS --> DQ3
+QS --> DQ1
+QS --> DQ2
+QS --> DQ3
 @enduml

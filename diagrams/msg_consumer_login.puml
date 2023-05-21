@@ -1,0 +1,27 @@
+@startuml
+
+collections "Consumers" as C
+participant "Consumer Server" as CServ
+participant "Message Broker" as MB
+participant "Durable Queue Supervisor" as CS
+collections "Durable Queue Workers" as DQW
+participant "Database" as DB
+
+C -> CServ: Connect
+CServ -> C: Success
+C -> CServ: Login message
+CServ -> MB: Login message
+MB -> CS: {ConsumerName, Socket}
+CS -> DQW: {ConsumerName, Socket}
+MB -> C: Success
+DQW -> DB: Get message
+DB -> DQW: Message
+DQW -> C: Message
+C -> CServ: CONSACK
+CServ -> MB: CONSACK
+MB -> CS: CONSACK
+CS -> DQW: CONSACK
+DQW -> DB: Get message
+DB -> DQW: Message
+DQW -> C: Message
+@enduml
