@@ -6,16 +6,19 @@
 
 ## Diagrams
 Supervision tree
+
 ![sup tree](diagrams/sup_tree.png)
 
-
 Producer message
+
 ![producer message](diagrams/msg_producer.png)
 
 Consumer login message
+
 ![consumer login](diagrams/msg_consumer_login.png)
 
 Dead message
+
 ![dead message](diagrams/msg_error.png)
 ## Minimal Tasks
 
